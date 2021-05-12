@@ -16,7 +16,7 @@ class Claw(CMakePackage):
     maintainers = ['FrostyMike']
 
     version('master', branch='master', submodules=True)
-    version('2.1-rc', commit='54b6e1d49f5df3ff346c43d94f643a0342e46992')
+    version('2.1-rc', branch='fix-mtime-bug')
     version('2.0.2', commit='8c012d58484d8caf79a4fe45597dc74b4367421c', submodules=True)
     version('2.0.1', commit='f5acc929df74ce66a328aa4eda9cc9664f699b91', submodules=True)
     version('2.0', commit='53e705b8bfce40a5c5636e8194a7622e337cf4f5', submodules=True)
