@@ -185,13 +185,17 @@ class Cosmo(MakefilePackage):
 
         # Claw library
         if '+claw' in self.spec:
+            claw_flags = ''
+            if self.compiler.name == 'pgi':
+                claw_flags += ' --fc-vendor=portland --fc-cmd=${FC}'
             if 'cosmo_target=gpu' in self.spec:
-                env.append_flags('CLAWFC_FLAGS', '--directive=openacc -v')
+                claw_flags += ' --directive=openacc -v'
             env.set('CLAWDIR', self.spec['claw'].prefix)
             env.set('CLAWFC', self.spec['claw'].prefix + '/bin/clawfc')
             env.set('CLAWXMODSPOOL', self.spec['omni-xmod-pool'].prefix + '/omniXmodPool/')
             if self.mpi_spec.name == 'mpich':
-                env.set('CLAWFC_FLAGS', '-U__CRAYXC')
+                claw_flags += ' -D__CRAYXC'
+            env.set('CLAWFC_FLAGS', claw_flags)
 
         # Linker flags
         if self.compiler.name == 'pgi' and '~cppdycore' in self.spec:
