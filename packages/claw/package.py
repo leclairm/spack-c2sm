@@ -31,10 +31,10 @@ class Claw(CMakePackage):
     depends_on('cmake@3.12:%gcc', type='build')
     depends_on('java@8:', when="@2.0:")
     depends_on('java@7:', when="@1.1.0:1.2.3")
-    depends_on('ant@1.9:%gcc')
+    depends_on('ant@1.9:%gcc', type='build')
     depends_on('libxml2%gcc')
-    depends_on('bison%gcc')
-    depends_on('flex%gcc')
+    depends_on('bison%gcc', type='build')
+    depends_on('flex%gcc', type='build')
 
     def setup_environment(self, spack_env, run_env):
         spack_env.set('YACC', 'bison -y')
@@ -49,8 +49,9 @@ class Claw(CMakePackage):
         if self.version < Version('2.1'):
             args.append('-DOMNI_CONF_OPTION=--with-libxml2={0}'.
                         format(spec['libxml2'].prefix))
-
-        args.append('-DCMAKE_Fortran_COMPILER={0}'.
-                    format(self.compiler.fc))
+        else:
+            args.append('-DOMNI_LINK_STATIC_GNU_LIBSTDCXX=ON')
 
         return args
+
+
