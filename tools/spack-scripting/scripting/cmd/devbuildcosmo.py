@@ -94,7 +94,7 @@ def devbuildcosmo(self, args):
     # Launch cosmo tests
     if args.test:
         print('\033[92m' + '==> ' + '\033[0m' + 'cosmo: Launching cosmo tests')
-        subprocess.run(["./cosmo/ACC/test/tools/test_cosmo.py", str(cosmo_spec), source_path])
+        subprocess.run(["./cosmo/ACC/test/tools/test_cosmo.py", '-s', str(cosmo_spec), '-b', source_path])
 
     # Serialize data
     if '+serialize' in cosmo_spec:
