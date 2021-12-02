@@ -1,0 +1,8 @@
+compilers:
+- compiler:
+    spec: gcc@9.3.0
+    flags: {}
+    operating_system: ubuntu20.04
+    target: any
+    environment: {}
+    extra_rpaths: []

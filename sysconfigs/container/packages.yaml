@@ -1,0 +1,19 @@
+packages:
+  all:
+    compiler: [gcc@9.3.0]
+  cmake:
+    modules:
+      cmake@3.16.3%gcc: cmake/3.16.3
+    buildable: true
+    version: [3.16.3]
+    target: []
+    providers: {}
+    compiler: []
+    paths: {}
+  cuda:
+    modules:
+      cuda@11.4.0%gcc: cuda/11.4.0
+    buildable: true
+    version: []
+    target: []
+    providers: {}
