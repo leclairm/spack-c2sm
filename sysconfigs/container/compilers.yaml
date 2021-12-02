@@ -3,6 +3,11 @@ compilers:
     spec: gcc@9.3.0
     flags: {}
     operating_system: ubuntu20.04
+    paths:
+      cc: /usr/bin/gcc
+      cxx: /usr/bin/g++
+      f77: /usr/bin/pgfortran
+      fc: /usr/bin/pgfortran
     target: any
     environment: {}
     extra_rpaths: []
