@@ -2,6 +2,7 @@ compilers:
 - compiler:
     spec: gcc@9.3.0
     flags: {}
+    modules:
     operating_system: ubuntu20.04
     paths:
       cc: /usr/bin/gcc
@@ -11,3 +12,18 @@ compilers:
     target: any
     environment: {}
     extra_rpaths: []
+compilers:
+- compiler:
+    spec: nvhpc@21.9
+    paths:
+      cc: /opt/nvidia/hpc_sdk/Linux_x86_64/21.9/compilers/bin/nvc
+      cxx: /opt/nvidia/hpc_sdk/Linux_x86_64/21.9/compilers/bin/nvc++
+      f77: /opt/nvidia/hpc_sdk/Linux_x86_64/21.9/compilers/bin/nvfortran
+      fc: /opt/nvidia/hpc_sdk/Linux_x86_64/21.9/compilers/bin/nvfortran
+    flags: {}
+    operating_system: ubuntu20.04
+    target: x86_64
+    modules: []
+    environment: {}
+    extra_rpaths: []
+
