@@ -7,8 +7,8 @@ compilers:
     paths:
       cc: /usr/bin/gcc
       cxx: /usr/bin/g++
-      f77: /usr/bin/pgfortran
-      fc: /usr/bin/pgfortran
+      f77: /usr/bin/gfortran
+      fc: /usr/bin/gfortran
     target: any
     environment: {}
     extra_rpaths: []
