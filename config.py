@@ -25,11 +25,14 @@ def main():
         required=True,
         help=
         'Where the Spack instance is installed or you want it to be installed')
-    parser.add_argument('-m',
+    machine_conf = parser.add_mutually_exclusive_group(required=True)
+    machine_conf.add_argument('-m',
                         '--machine',
                         type=str,
-                        required=True,
-                        help='Required: machine name')
+                        help='machine name')
+    machine_conf.add_argument('--machine-confdir',
+                        type=str,
+                        help='directory with machine configuration files, compliant with examples in sysconfigs/<machine>')
     parser.add_argument('-u',
                         '--upstreams',
                         type=str,
@@ -92,7 +95,17 @@ def main():
     sys.path.insert(1, os.path.join(args.idir, 'spack/lib/spack/external'))
     from ruamel import yaml
 
-    print('Installing mch packages & ' + args.machine + ' config files.')
+
+    if args.machine:
+        machine_instance = args.machine
+        machine = machine_instance.replace('admin-', '')
+        machine_config_path = dir_path + '/sysconfigs/' + machine
+    else:
+        machine_config_path = args.machine_confdir
+        machine = yaml.safe_load(open(machine_config_path+'/compilers.yaml', 'r'))['compilers'][0]['compiler']['operating_system']
+        machine_instance = machine
+
+    print(f'Installing instance: {machine_instance}, machine: {machine}, config_path: {machine_config_path}')
 
     if not args.reposdir:
         args.reposdir = args.idir + '/spack/etc/spack'
@@ -115,14 +128,13 @@ def main():
     # copy config.yaml file in site scope of spack instance
     configfile = args.idir + '/spack/etc/spack' + '/config.yaml'
 
-    shutil.copy(
-        'sysconfigs/' + args.machine.replace('admin-', '') + '/config.yaml',
+    shutil.copy(machine_config_path + '/config.yaml',
         configfile)
 
     config_data = yaml.safe_load(open(configfile, 'r'))
 
     if not args.pckgidir:
-        if 'admin' in args.machine:
+        if 'admin' in machine_instance:
             args.pckgidir = '/project/g110'
         else:
             args.pckgidir = '$SCRATCH'
@@ -148,20 +160,17 @@ def main():
         return os.path.realpath(path)
 
     config_data['config']['install_tree']['root'] = (
-        to_spack_abs_path(args.pckgidir) + '/spack-install/' +
-        args.machine.replace('admin-', ''))
+        to_spack_abs_path(args.pckgidir) + '/spack-install/' + machine)
     config_data['config']['source_cache'] = (
-        to_spack_abs_path(args.cacheidir) + '/' +
-        args.machine.replace('admin-', '') + '/source_cache')
+        to_spack_abs_path(args.cacheidir) + '/' + machine + '/source_cache')
     config_data['config']['misc_cache'] = (to_spack_abs_path(args.cacheidir) +
                                            '/' +
-                                           args.machine.replace('admin-', '') +
-                                           '/cache')
+                                           machine + '/cache')
     config_data['config']['build_stage'] = [
-        to_spack_abs_path(args.stgidir) + '/spack-stages/' + args.machine
+        to_spack_abs_path(args.stgidir) + '/spack-stages/' + machine_instance
     ]
     config_data['config']['module_roots']['tcl'] = (
-        to_spack_abs_path(args.pckgidir) + '/modules/' + args.machine)
+        to_spack_abs_path(args.pckgidir) + '/modules/' + machine_instance)
     config_data['config']['extensions'] = [dir_path + '/tools/spack-scripting']
     yaml.safe_dump(config_data,
                    open(configfile, 'w'),
@@ -174,7 +183,7 @@ def main():
 
         upstreams_data = yaml.safe_load(open(upstreamfile, 'r'))
         upstreams_data['upstreams']['spack-instance-1']['install_tree'] = '/project/g110/spack-install/' + \
-            args.machine.replace('admin-', '')
+            machine
         yaml.safe_dump(upstreams_data,
                        open(upstreamfile, 'w'),
                        default_flow_style=False)
@@ -187,9 +196,8 @@ def main():
         )
     else:
         for afile in config_files:
-            cmd = 'cp ' + dir_path + '/sysconfigs/' + args.machine.replace(
-                'admin-',
-                '') + '/' + afile + ' ' + args.idir + '/spack/etc/spack/'
+            cmd = 'cp ' + machine_config_path + \
+            '/' + afile + ' ' + args.idir + '/spack/etc/spack/'
             subprocess.run(cmd.split(), check=True)
 
     print('Spack successfully installed. \nsource ' + args.idir +
