@@ -26,13 +26,13 @@ def main():
         help=
         'Where the Spack instance is installed or you want it to be installed')
     machine_conf = parser.add_mutually_exclusive_group(required=True)
-    machine_conf.add_argument('-m',
-                        '--machine',
-                        type=str,
-                        help='machine name')
-    machine_conf.add_argument('--machine-confdir',
-                        type=str,
-                        help='directory with machine configuration files, compliant with examples in sysconfigs/<machine>')
+    machine_conf.add_argument('-m', '--machine', type=str, help='machine name')
+    machine_conf.add_argument(
+        '--machine-confdir',
+        type=str,
+        help=
+        'directory with machine configuration files, compliant with examples in sysconfigs/<machine>'
+    )
     parser.add_argument('-u',
                         '--upstreams',
                         type=str,
@@ -95,17 +95,20 @@ def main():
     sys.path.insert(1, os.path.join(args.idir, 'spack/lib/spack/external'))
     from ruamel import yaml
 
-
     if args.machine:
         machine_instance = args.machine
         machine = machine_instance.replace('admin-', '')
         machine_config_path = dir_path + '/sysconfigs/' + machine
     else:
         machine_config_path = args.machine_confdir
-        machine = yaml.safe_load(open(machine_config_path+'/compilers.yaml', 'r'))['compilers'][0]['compiler']['operating_system']
+        machine = yaml.safe_load(
+            open(machine_config_path + '/compilers.yaml',
+                 'r'))['compilers'][0]['compiler']['operating_system']
         machine_instance = machine
 
-    print(f'Installing instance: {machine_instance}, machine: {machine}, config_path: {machine_config_path}')
+    print(
+        f'Installing instance: {machine_instance}, machine: {machine}, config_path: {machine_config_path}'
+    )
 
     if not args.reposdir:
         args.reposdir = args.idir + '/spack/etc/spack'
@@ -128,8 +131,7 @@ def main():
     # copy config.yaml file in site scope of spack instance
     configfile = args.idir + '/spack/etc/spack' + '/config.yaml'
 
-    shutil.copy(machine_config_path + '/config.yaml',
-        configfile)
+    shutil.copy(machine_config_path + '/config.yaml', configfile)
 
     config_data = yaml.safe_load(open(configfile, 'r'))
 
@@ -164,8 +166,7 @@ def main():
     config_data['config']['source_cache'] = (
         to_spack_abs_path(args.cacheidir) + '/' + machine + '/source_cache')
     config_data['config']['misc_cache'] = (to_spack_abs_path(args.cacheidir) +
-                                           '/' +
-                                           machine + '/cache')
+                                           '/' + machine + '/cache')
     config_data['config']['build_stage'] = [
         to_spack_abs_path(args.stgidir) + '/spack-stages/' + machine_instance
     ]
