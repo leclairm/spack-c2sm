@@ -17,9 +17,7 @@ class FdbFortran(CMakePackage):
             branch='archive_retreive')
 
     depends_on('cmake@3.10:', type=('build'))
-    depends_on(
-        'fdb ^eckit@1.20.2: ~mpi ^metkit@1.9.2',
-        type=('build', 'link'))
+    depends_on('fdb ^eckit@1.20.2: ~mpi ^metkit@1.9.2', type=('build', 'link'))
 
 
 def cmake_args(self):
