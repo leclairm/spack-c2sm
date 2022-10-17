@@ -9,7 +9,7 @@ packages:
   gridtools: # manually added
     variants: +cuda cuda_arch=80
   icon: # manually added
-    variants: host=manali
+    variants: cuda_arch=80
   icontools: # manually added
     variants: slave=manali
   int2lm: # manually added
