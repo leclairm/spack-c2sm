@@ -26,8 +26,7 @@ class FlexpartIfs(MakefilePackage):
             description='Use FDB as data source for Flexpart.')
 
     depends_on('netcdf-fortran', type=('build', 'link'))
-    depends_on('eccodes jp2k=none +fortran',
-               type=('build', 'link'))
+    depends_on('eccodes jp2k=none +fortran', type=('build', 'link'))
     depends_on('fdb-fortran@archive_retreive',
                when='+fdb',
                type=('build', 'link'))
