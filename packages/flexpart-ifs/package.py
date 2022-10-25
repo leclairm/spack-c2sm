@@ -21,15 +21,15 @@ class FlexpartIfs(MakefilePackage):
             git='https://github.com/MeteoSwiss-APN/fdb-flexpart.git',
             branch='fdb')
 
+    variant('fdb',
+            default=False,
+            description='Use FDB as data source for Flexpart.')
+
     depends_on('netcdf-fortran', type=('build', 'link'))
     depends_on('eccodes jp2k=none +fortran',
-               when='@meteoswiss-10',
-               type=('build', 'link'))
-    depends_on('eccodes jp2k=none +fortran',
-               when='@fdb',
                type=('build', 'link'))
     depends_on('fdb-fortran@archive_retreive',
-               when='@fdb',
+               when='+fdb',
                type=('build', 'link'))
     build_directory = 'src'
 
