@@ -46,7 +46,8 @@ class FlexpartIfs(MakefilePackage):
         env.set(
             'ECCODES_LD_FLAGS', '-L' + self.spec['eccodes'].prefix +
             '/lib64 -leccodes_f90 -leccodes')
-        if (self.spec.version not in (Version('fdb')) and '+fdb' not in self.spec):
+        if (self.spec.version not in (Version('fdb'))
+                and '+fdb' not in self.spec):
             env.set('JASPER_LD_FLAGS', '-Wl,--no-relax')
             # not really required, just a default since the -I flags would be inconsistent with an empty string
             env.set('CURL_INCLUDES', '/usr')
