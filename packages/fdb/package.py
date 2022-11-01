@@ -22,8 +22,12 @@ class Fdb(CMakePackage):
             sha256=
             "6adac23c0d1de54aafb3c663d077b85d0f804724596623b381ff15ea4a835f60")
     version("master", git='https://github.com/ecmwf/fdb.git', branch='master')
-    version("develop", git='https://github.com/ecmwf/fdb.git', branch='develop')
-    version("inspect", git='https://github.com/ecmwf/fdb.git', branch='feature/c_inspect')
+    version("develop",
+            git='https://github.com/ecmwf/fdb.git',
+            branch='develop')
+    version("inspect",
+            git='https://github.com/ecmwf/fdb.git',
+            branch='feature/c_inspect')
 
     variant("tools", default=True, description="Build the command line tools")
     variant(
