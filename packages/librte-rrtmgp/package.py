@@ -20,16 +20,16 @@ class LibrteRrtmgp(AutotoolsPackage):
 
     @property
     def libs(self):
-        return find_libraries(
-            ['librte', 'librrtmgp'],
-            root=self.prefix.lib, shared=False)
+        return find_libraries(['librte', 'librrtmgp'],
+                              root=self.prefix.lib,
+                              shared=False)
 
     def configure_args(self):
         args = self.enable_or_disable('openacc')
         if self.run_tests:
-            args.extend(
-                ['--enable-tests',
-                 '--with-netcdf-fortran=%s' %
-                 self.spec['netcdf-fortran'].prefix])
+            args.extend([
+                '--enable-tests',
+                '--with-netcdf-fortran=%s' % self.spec['netcdf-fortran'].prefix
+            ])
 
         return args

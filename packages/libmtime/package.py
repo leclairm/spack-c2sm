@@ -7,7 +7,8 @@ class Libmtime(AutotoolsPackage):
 
     version('1.0.8-p1', branch='1.0.8-patched')
 
-    variant('openmp', default=False,
+    variant('openmp',
+            default=False,
             description='Ensure compatibility with OpenMP applications')
     variant('examples', default=True, description='Build examples')
 
@@ -18,9 +19,10 @@ class Libmtime(AutotoolsPackage):
         config_args += self.enable_or_disable('openmp')
 
         if self.run_tests:
-            config_args.extend(
-                ['--enable-check',
-                 '--with-check-root=%s' % self.spec['libcheck'].prefix])
+            config_args.extend([
+                '--enable-check',
+                '--with-check-root=%s' % self.spec['libcheck'].prefix
+            ])
         else:
             config_args.append('--disable-check')
 

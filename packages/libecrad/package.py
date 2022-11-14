@@ -8,7 +8,8 @@ class Libecrad(AutotoolsPackage):
     version('1.4.1', tag='ecrad-1.4.1')
     version('1.3.0', tag='ecrad-1.3.0')
 
-    variant('single-precision', default=False,
+    variant('single-precision',
+            default=False,
             description='switch to single precision')
 
     depends_on('netcdf-fortran')
@@ -26,7 +27,8 @@ class Libecrad(AutotoolsPackage):
     def libs(self):
         return find_libraries(
             ['libradiation', 'libifsrrtm', 'libutilities', 'libifsaux'],
-            root=self.prefix.lib, shared=False)
+            root=self.prefix.lib,
+            shared=False)
 
     def configure_args(self):
         args = self.enable_or_disable('single-precision')

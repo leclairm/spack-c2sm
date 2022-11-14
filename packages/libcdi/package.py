@@ -12,15 +12,20 @@ class Libcdi(AutotoolsPackage):
 
     variant('shared', default=True, description='Enable shared libraries')
     variant('netcdf', default=True, description='Enable NetCDF support')
-    variant('grib2', default='eccodes', values=('eccodes', 'grib-api', 'none'),
+    variant('grib2',
+            default='eccodes',
+            values=('eccodes', 'grib-api', 'none'),
             description='Specify GRIB2 backend')
-    variant('external-grib1', default=False,
+    variant('external-grib1',
+            default=False,
             description='Ignore the built-in support and use the external '
-                        'GRIB2 backend for GRIB1 files')
-    variant('szip-grib1', default=False,
+            'GRIB2 backend for GRIB1 files')
+    variant('szip-grib1',
+            default=False,
             description='Enable szip compression for GRIB1')
     variant('fortran', default=True, description='Enable Fortran interfaces')
-    variant('threads', default=True,
+    variant('threads',
+            default=True,
             description='Compile and link for multithreading')
 
     depends_on('netcdf-c', when='+netcdf')
@@ -34,7 +39,8 @@ class Libcdi(AutotoolsPackage):
 
     depends_on('uuid')
 
-    conflicts('+szip-grib1', when='+external-grib1 grib2=none',
+    conflicts('+szip-grib1',
+              when='+external-grib1 grib2=none',
               msg='The configuration does not support GRIB1')
 
     conflicts('^ossp-uuid', msg='OSSP uuid is not currently supported')
@@ -47,8 +53,10 @@ class Libcdi(AutotoolsPackage):
         lib_names.append('libcdi')
 
         shared = '+shared' in self.spec
-        libs = find_libraries(
-            lib_names, root=self.prefix, shared=shared, recursive=True)
+        libs = find_libraries(lib_names,
+                              root=self.prefix,
+                              shared=shared,
+                              recursive=True)
 
         if libs:
             return libs
@@ -110,17 +118,18 @@ class Libcdi(AutotoolsPackage):
             config_args.append('--without-szlib')
 
         if '+fortran' in self.spec:
-            config_args.extend(['--enable-iso-c-interface',
-                                '--enable-cf-interface'])
+            config_args.extend(
+                ['--enable-iso-c-interface', '--enable-cf-interface'])
         else:
-            config_args.extend(['--disable-iso-c-interface',
-                                '--disable-cf-interface'])
+            config_args.extend(
+                ['--disable-iso-c-interface', '--disable-cf-interface'])
 
         # We do not use libs.search_flags because we need to filter the system
         # directories out.
         config_args.extend([
-            'LDFLAGS={0}'.format(' '.join(['-L' + d for d in libs.directories
-                                           if not is_system_path(d)])),
-            'LIBS={0}'.format(libs.link_flags)])
+            'LDFLAGS={0}'.format(' '.join([
+                '-L' + d for d in libs.directories if not is_system_path(d)
+            ])), 'LIBS={0}'.format(libs.link_flags)
+        ])
 
         return config_args

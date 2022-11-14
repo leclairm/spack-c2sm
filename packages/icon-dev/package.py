@@ -9,82 +9,113 @@ class IconDev(BundlePackage):
     # Model features (only those that might trigger additional software
     # dependencies or constraints):
     variant('coupling', default=True, description='Enable the coupling')
-    variant('ecrad', default=False,
+    variant('ecrad',
+            default=False,
             description='Enable usage of the ECMWF radiation scheme (ECRAD)')
-    variant('rte-rrtmgp', default=False,
+    variant('rte-rrtmgp',
+            default=False,
             description='enable usage of the RTE+RRTMGP toolbox for radiation '
-                        'calculations')
-    variant('rttov', default=False,
-            description='Enable usage of the radiative transfer model for TOVS')
-    variant('dace', default=False,
+            'calculations')
+    variant(
+        'rttov',
+        default=False,
+        description='Enable usage of the radiative transfer model for TOVS')
+    variant('dace',
+            default=False,
             description='Enable the DACE modules for data assimilation')
-    variant('emvorado', default=False,
+    variant('emvorado',
+            default=False,
             description='Enable the radar forward operator EMVORADO')
-    variant('art', default=False,
+    variant('art',
+            default=False,
             description='Enable the aerosols and reactive trace component ART')
 
     # Infrastructural Features (only those that might trigger additional
     # software dependencies or contraints):
-    variant('mpi', default=True,
+    variant('mpi',
+            default=True,
             description='Enable MPI (parallelization) support')
     variant('openmp', default=False, description='Enable OpenMP support')
     variant('gpu', default=False, description='Enable GPU support')
-    variant('grib2', default='eccodes', values=('none', 'eccodes', 'grib-api'),
+    variant('grib2',
+            default='eccodes',
+            values=('none', 'eccodes', 'grib-api'),
             description='Enable GRIB2 I/O using the specified backend')
-    variant('parallel-netcdf', default=False,
+    variant('parallel-netcdf',
+            default=False,
             description='Enable usage of the parallel features of NetCDF')
-    variant('cdi-pio', default=False,
+    variant('cdi-pio',
+            default=False,
             description='Enable usage of the parallel features of CDI')
     variant('sct', default=False, description='Enable the SCT timer')
     variant('yaxt', default=True, description='Enable the YAXT data exchange')
     variant('claw', default=False, description='Enable CLAW preprocessing')
-    variant('serialization', default=False,
+    variant('serialization',
+            default=False,
             description='Enable the Serialbox2 serialization')
 
-    for bundled_lib in ['ecrad', 'rte-rrtmgp', 'sct', 'yaxt', 'cdi', 'mtime',
-                        'yac', 'tixi', 'self', 'cub']:
-        variant('external-{0}'.format(bundled_lib), default=False,
-                description='use external {0} library '
-                .format(bundled_lib.upper()))
+    for bundled_lib in [
+            'ecrad', 'rte-rrtmgp', 'sct', 'yaxt', 'cdi', 'mtime', 'yac',
+            'tixi', 'self', 'cub'
+    ]:
+        variant('external-{0}'.format(bundled_lib),
+                default=False,
+                description='use external {0} library '.format(
+                    bundled_lib.upper()))
 
-    conflicts('+external-tixi', when='~art',
+    conflicts('+external-tixi',
+              when='~art',
               msg='external TIXI is not required when ART is disabled')
-    conflicts('+externals-yac', when='~coupling',
+    conflicts('+externals-yac',
+              when='~coupling',
               msg='external YAC is not required when the coupling is disabled')
-    conflicts('+external-yac', when='~external-mtime',
+    conflicts('+external-yac',
+              when='~external-mtime',
               msg='building with external YAC requires '
-                  'building with external MTIME')
-    conflicts('+coupling', when='~mpi',
+              'building with external MTIME')
+    conflicts('+coupling',
+              when='~mpi',
               msg='building with the coupling requires '
-                  'building with MPI support')
-    conflicts('+cdi-pio', when='~external-cdi',
+              'building with MPI support')
+    conflicts('+cdi-pio',
+              when='~external-cdi',
               msg='building with the parallel features of CDI requires '
-                  'building with external CDI')
-    conflicts('+cdi-pio', when='~mpi',
+              'building with external CDI')
+    conflicts('+cdi-pio',
+              when='~mpi',
               msg='building with the parallel features of CDI requires '
-                  'building with MPI support')
-    conflicts('+yaxt', when='~mpi',
+              'building with MPI support')
+    conflicts('+yaxt',
+              when='~mpi',
               msg='building with the YAXT data exchange requires '
-                  'building with MPI support')
-    conflicts('+parallel-netcdf', when='~mpi',
+              'building with MPI support')
+    conflicts('+parallel-netcdf',
+              when='~mpi',
               msg='building with the parallel features of NetCDF requires '
-                  'building with MPI support')
-    conflicts('+external-yaxt', when='~cdi-pio~yaxt',
+              'building with MPI support')
+    conflicts('+external-yaxt',
+              when='~cdi-pio~yaxt',
               msg='external YAXT is not required when both the parallel '
-                  'features of CDI and the YAXT data exchange are disabled')
-    conflicts('+external-sct', when='~sct',
-              msg='external SCT is not required when the SCT timer is disabled')
-    conflicts('+external-ecrad', when='~ecrad',
+              'features of CDI and the YAXT data exchange are disabled')
+    conflicts(
+        '+external-sct',
+        when='~sct',
+        msg='external SCT is not required when the SCT timer is disabled')
+    conflicts('+external-ecrad',
+              when='~ecrad',
               msg='external ECRAD is not required when the ECMWF radiation '
-                  'scheme (ECRAD) is disabled')
-    conflicts('+external-rte-rrtmgp', when='~rte-rrtmgp',
+              'scheme (ECRAD) is disabled')
+    conflicts('+external-rte-rrtmgp',
+              when='~rte-rrtmgp',
               msg='external RTE-RRTMGP is not required when the RTE+RRTMGP '
-                  'toolbox for radiation calculations is disabled')
-    conflicts('+external-cub', when='~gpu',
+              'toolbox for radiation calculations is disabled')
+    conflicts('+external-cub',
+              when='~gpu',
               msg='external CUB is not required when GPU support is disabled')
-    conflicts('+gpu', when='~claw',
+    conflicts('+gpu',
+              when='~claw',
               msg='building with GPU support requires '
-                  'building with CLAW preprocessing')
+              'building with CLAW preprocessing')
 
     depends_on('libself', when='+external-self')
     depends_on('libicon-tixi', when='+external-tixi')
@@ -95,8 +126,9 @@ class IconDev(BundlePackage):
     depends_on('serialbox', when='+serialization')
 
     for grib2_backend in ['none', 'eccodes', 'grib-api']:
-        depends_on('libcdi+fortran+netcdf grib2={0}'.format(grib2_backend),
-                   when='+external-cdi~cdi-pio grib2={0}'.format(grib2_backend))
+        depends_on(
+            'libcdi+fortran+netcdf grib2={0}'.format(grib2_backend),
+            when='+external-cdi~cdi-pio grib2={0}'.format(grib2_backend))
         depends_on('libcdi-pio+fortran+netcdf grib2={0}'.format(grib2_backend),
                    when='+cdi-pio grib2={0}'.format(grib2_backend))
 
