@@ -1,0 +1,56 @@
+--- a/utilities/print_matrix.F90
++++ b/utilities/print_matrix.F90
+@@ -13,15 +13,15 @@ contains
+       unit_local = 6
+     end if
+     if (present(name)) then
+-      write(unit_local,'(a,a,$)') name, '=['
++      write(unit_local,'(a,a)', advance='no') name, '=['
+     end if
+     do i = 1,size(vec,1)
+-       write(unit_local,'(f16.8,$)') vec(i)
++       write(unit_local,'(f16.8)', advance='no') vec(i)
+     end do
+     if (present(name)) then
+       write(unit_local,'(a)') ']'
+     else
+-      write(unit_local,'(x)')
++      write(unit_local,'(1x)')
+     end if
+ 
+   end subroutine print_vector
+@@ -40,16 +40,16 @@ contains
+     end if
+ 
+     if (present(name)) then
+-      write(unit_local,'(a,a,$)') name, '=['
++      write(unit_local,'(a,a)', advance='no') name, '=['
+     end if
+     do i = 1,size(mat,1)
+        do j = 1,size(mat,2)
+-          write(unit_local,'(f16.8,$)') mat(i,j)
++          write(unit_local,'(f16.8)', advance='no') mat(i,j)
+        end do
+        if (present(name) .and. i == size(mat,1)) then
+          write(unit_local,'(a)') ']'
+        else
+-         write(unit_local,'(x)')
++         write(unit_local,'(1x)')
+        end if
+     end do
+   end subroutine print_matrix
+@@ -63,11 +63,11 @@ contains
+     do k = 1,size(mat,3)
+       do i = 1,size(mat,1)
+         do j = 1,size(mat,2)
+-             write(6,'(f16.8,$)') mat(i,j,k)
++             write(6,'(f16.8)', advance='no') mat(i,j,k)
+           end do
+-          write(6,'(x)')
++          write(6,'(1x)')
+        end do
+-       write(6,'(x)')
++       write(6,'(1x)')
+     end do
+   end subroutine print_array3
+   

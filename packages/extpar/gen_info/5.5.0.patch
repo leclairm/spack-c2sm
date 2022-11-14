@@ -1,0 +1,11 @@
+--- a/bin/gen_info.sh
++++ b/bin/gen_info.sh
+@@ -59,7 +59,7 @@ string=$(grep 'Compiler *:' $fconfig | cut -d":" -f2 | cut -d" " -f3-)
+ # information related to version control system
+ cd ${extpar_dir}
+ 
+-if [[ $(git rev-parse --is-inside-work-tree 2> /dev/null) = "true" ]]
++if [[ -d ./.git ]]
+ then
+     # this is a git clone copy
+     code_version=$(cd ${extpar_dir} && git describe --tags | awk -F'-' '{print $1}')
