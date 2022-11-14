@@ -20,8 +20,10 @@ class LibiconTixi(AutotoolsPackage):
             if is_system_path(xml2_spec.prefix):
                 xml2_headers = xml2_spec.headers
                 # We, however, should filter the pure system directories out:
-                xml2_headers.directories = [d for d in xml2_headers.directories
-                                            if not is_system_path(d)]
+                xml2_headers.directories = [
+                    d for d in xml2_headers.directories
+                    if not is_system_path(d)
+                ]
                 flags.append(xml2_headers.cpp_flags)
 
         return flags, None, None

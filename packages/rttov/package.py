@@ -12,8 +12,12 @@ class Rttov(Package):
     homepage = 'https://nwp-saf.eumetsat.int/site/software/rttov/'
     manual_download = True
 
-    version('13.1', sha256='f3bec1ca3ba952bc49e19d851144f9d51126bfe59f473be4992eac0b3366dbb2')
-    version('12.3', sha256='c9e71861c2fae7b6e793405dc23f0fe42ced98b0a8313865ed480edd71f12f57')
+    version('13.1',
+            sha256=
+            'f3bec1ca3ba952bc49e19d851144f9d51126bfe59f473be4992eac0b3366dbb2')
+    version('12.3',
+            sha256=
+            'c9e71861c2fae7b6e793405dc23f0fe42ced98b0a8313865ed480edd71f12f57')
 
     variant('hdf5', default=False, description='Enable HDF5 support')
     variant('netcdf', default=False, description='Enable NetCDF support')
@@ -55,25 +59,30 @@ class Rttov(Package):
         # also have to introduce several versions of each patch file to support
         # different versions of the package.
 
-        patch_kind_files = ['src/main/rttov_fastem5.F90',
-                            'src/main/rttov_fastem5_ad.F90',
-                            'src/main/rttov_fastem5_k.F90',
-                            'src/main/rttov_fastem5_tl.F90']
+        patch_kind_files = [
+            'src/main/rttov_fastem5.F90', 'src/main/rttov_fastem5_ad.F90',
+            'src/main/rttov_fastem5_k.F90', 'src/main/rttov_fastem5_tl.F90'
+        ]
 
         filter_file(r'(?i)(real\(\d+,)8(\))',
                     '\\1selected_real_kind(13, 300)\\2',
-                    *patch_kind_files, ignore_absent=True)
+                    *patch_kind_files,
+                    ignore_absent=True)
 
     @property
     def libs(self):
-        basenames = ['other', 'emis_atlas', 'brdf_atlas', 'parallel', 'coef_io']
+        basenames = [
+            'other', 'emis_atlas', 'brdf_atlas', 'parallel', 'coef_io'
+        ]
         if '+hdf5' in self.spec:
             basenames.append('hdf')
         basenames.append('main')
-        return find_libraries(
-            ['librttov{0}_{1}'.format(self.spec.version.up_to(1), n)
-             for n in basenames],
-            root=self.prefix.lib, shared=False)
+        return find_libraries([
+            'librttov{0}_{1}'.format(self.spec.version.up_to(1), n)
+            for n in basenames
+        ],
+                              root=self.prefix.lib,
+                              shared=False)
 
     def install(self, spec, prefix):
         build_aux_dir = join_path(self.stage.source_path, 'build')
@@ -88,8 +97,7 @@ class Rttov(Package):
 
         makefile_args = [
             'ARCH={0}'.format(arch_filename),
-            'INSTALLDIR={0}'.format(build_dirname),
-            'AR=ar r'
+            'INSTALLDIR={0}'.format(build_dirname), 'AR=ar r'
         ]
 
         makefile_vars = defaultdict(list)
@@ -108,8 +116,8 @@ class Rttov(Package):
             makefile_vars['FFLAGS_ARCH'].append(common_flags)
             target_basenames = ['rttov_opdep_9_ad', 'rttov_opdep_9_k']
             if self.spec.satisfies('@13:'):
-                target_basenames.extend(['rttov_opdep_13_ad',
-                                         'rttov_opdep_13_k'])
+                target_basenames.extend(
+                    ['rttov_opdep_13_ad', 'rttov_opdep_13_k'])
             for f in target_basenames:
                 makefile_vars['FFLAGS_ARCH_{0}'.format(f)].extend(
                     ['-unroll0', common_flags])
@@ -128,9 +136,10 @@ class Rttov(Package):
                         ['-O0', common_flags])
         elif self.compiler.name in ['pgi', 'nvhpc']:
             common_flags = '-Kieee -notraceback'
-            makefile_vars['FFLAGS_ARCH'].extend(
-                ['-O2', '-fast' if '+openmp' in self.spec else '-fastsse',
-                 common_flags])
+            makefile_vars['FFLAGS_ARCH'].extend([
+                '-O2', '-fast' if '+openmp' in self.spec else '-fastsse',
+                common_flags
+            ])
             makefile_vars['FFLAGS_ARCH_rttov_dom_setup_profile'].extend(
                 ['-O1', common_flags])
         else:
@@ -161,15 +170,16 @@ class Rttov(Package):
         lapack_libs += self.spec['blas:fortran'].libs
         makefile_vars['LDFLAGS_EXTERN'].append(lapack_libs.link_flags)
 
-        makefile_args.extend(['{0}={1}'.format(var, ' '.join(val))
-                              for var, val in makefile_vars.items()])
+        makefile_args.extend([
+            '{0}={1}'.format(var, ' '.join(val))
+            for var, val in makefile_vars.items()
+        ])
 
         with working_dir(join_path(self.stage.source_path, 'src')):
             makefile_pl = Executable(join_path(build_aux_dir, 'Makefile.PL'))
             makefile_pl(
                 'RTTOV_HDF={0}'.format('1' if '+hdf5' in self.spec else '0'),
-                'RTTOV_F2PY=0',
-                'RTTOV_USER_LAPACK=1')
+                'RTTOV_F2PY=0', 'RTTOV_USER_LAPACK=1')
             make(*makefile_args, parallel=False)
 
         build_dir = join_path(self.stage.source_path, build_dirname)

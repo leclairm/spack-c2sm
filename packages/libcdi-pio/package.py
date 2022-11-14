@@ -13,15 +13,20 @@ class LibcdiPio(AutotoolsPackage):
 
     variant('shared', default=True, description='Enable shared libraries')
     variant('netcdf', default=True, description='Enable NetCDF support')
-    variant('grib2', default='eccodes', values=('eccodes', 'grib-api', 'none'),
+    variant('grib2',
+            default='eccodes',
+            values=('eccodes', 'grib-api', 'none'),
             description='Specify GRIB2 backend')
-    variant('external-grib1', default=False,
+    variant('external-grib1',
+            default=False,
             description='Ignore the built-in support and use the external '
-                        'GRIB2 backend for GRIB1 files')
-    variant('szip-grib1', default=False,
+            'GRIB2 backend for GRIB1 files')
+    variant('szip-grib1',
+            default=False,
             description='Enable szip compression for GRIB1')
     variant('fortran', default=True, description='Enable Fortran interfaces')
-    variant('threads', default=True,
+    variant('threads',
+            default=True,
             description='Compile and link for multithreading')
     variant('mpi', default=True, description='Enable parallel output features')
 
@@ -43,7 +48,8 @@ class LibcdiPio(AutotoolsPackage):
     depends_on('yaxt+fortran', when='+mpi+fortran')
     depends_on('scales-ppm+mpi', when='+mpi')
 
-    conflicts('+szip-grib1', when='+external-grib1 grib2=none',
+    conflicts('+szip-grib1',
+              when='+external-grib1 grib2=none',
               msg='The configuration does not support GRIB1')
 
     conflicts('^ossp-uuid', msg='OSSP uuid is not currently supported')
@@ -66,8 +72,10 @@ class LibcdiPio(AutotoolsPackage):
         lib_names.append('libcdi')
 
         shared = '+shared' in self.spec
-        libs = find_libraries(
-            lib_names, root=self.prefix, shared=shared, recursive=True)
+        libs = find_libraries(lib_names,
+                              root=self.prefix,
+                              shared=shared,
+                              recursive=True)
 
         if libs:
             return libs
@@ -128,37 +136,36 @@ class LibcdiPio(AutotoolsPackage):
             config_args.append('--without-szlib')
 
         if '+fortran' in self.spec:
-            config_args.extend(['--enable-iso-c-interface',
-                                '--enable-cf-interface'])
+            config_args.extend(
+                ['--enable-iso-c-interface', '--enable-cf-interface'])
         else:
-            config_args.extend(['--disable-iso-c-interface',
-                                '--disable-cf-interface'])
+            config_args.extend(
+                ['--disable-iso-c-interface', '--disable-cf-interface'])
 
         if '+mpi' in self.spec:
-            config_args.extend(['CC=' + self.spec['mpi'].mpicc,
-                                'FC=' + self.spec['mpi'].mpifc,
-                                '--enable-mpi'])
+            config_args.extend([
+                'CC=' + self.spec['mpi'].mpicc, 'FC=' + self.spec['mpi'].mpifc,
+                '--enable-mpi'
+            ])
         else:
             # Due to a bug in the configure script we have to avoid explicit
             # disabling of MPI support with '--disable-mpi'.
             pass
 
         if '^yaxt~fortran' in self.spec:
-            config_args.extend(['YAXT_LIBS= ',
-                                'YAXT_CFLAGS= '])
+            config_args.extend(['YAXT_LIBS= ', 'YAXT_CFLAGS= '])
 
         if self.run_tests and '^openmpi' in self.spec:
-            config_args.append(
-                self.spec['openmpi'].format(
-                    'MPI_LAUNCH={prefix.bin.mpirun} --oversubscribe'))
+            config_args.append(self.spec['openmpi'].format(
+                'MPI_LAUNCH={prefix.bin.mpirun} --oversubscribe'))
 
         # We do not use libs.search_flags because we need to filter the system
         # directories out.
         config_args.extend([
-            'LDFLAGS={0}'.format(
-                ' '.join(['-L' + d for d in libs.directories
-                          if not is_system_path(d)])),
-            'LIBS={0}'.format(libs.link_flags)])
+            'LDFLAGS={0}'.format(' '.join([
+                '-L' + d for d in libs.directories if not is_system_path(d)
+            ])), 'LIBS={0}'.format(libs.link_flags)
+        ])
 
         return config_args
 
@@ -189,7 +196,8 @@ class LibcdiPio(AutotoolsPackage):
             # Get the value of MPI_LAUNCH:
             mpi_launch = config_status('-q',
                                        '--file=-:{0}'.format(tmp_filename),
-                                       output=str, error=os.devnull).strip()
+                                       output=str,
+                                       error=os.devnull).strip()
 
             # No need to continue if the configure script managed to find a
             # working MPI_LAUNCH command (the value 'true' indicates that
@@ -205,7 +213,9 @@ class LibcdiPio(AutotoolsPackage):
             # the new value for MPI_LAUNCH:
             filter_file('S["MPI_LAUNCH"]="true"',
                         'S["MPI_LAUNCH"]="|| exit 77;"',
-                        './config.status', string=True, backup=False)
+                        './config.status',
+                        string=True,
+                        backup=False)
 
     @run_after('configure')
     def patch_libtool(self):
@@ -217,20 +227,23 @@ class LibcdiPio(AutotoolsPackage):
 
         # No need to do anything if we are not going to use NVHPC and AOCC
         # Fortran compilers:
-        if not (self.spec.satisfies('+fortran+shared') and
-                self.compiler.name in ['nvhpc', 'aocc']):
+        if not (self.spec.satisfies('+fortran+shared')
+                and self.compiler.name in ['nvhpc', 'aocc']):
             return
 
         with working_dir(self.build_directory):
             # How to pass a linker flag through the compiler:
-            filter_file(
-                r"^lt_prog_compiler_wl_FC=''$",
-                "lt_prog_compiler_wl_FC='{0}'".format(self.compiler.linker_arg),
-                './config.status', string=False, backup=False)
+            filter_file(r"^lt_prog_compiler_wl_FC=''$",
+                        "lt_prog_compiler_wl_FC='{0}'".format(
+                            self.compiler.linker_arg),
+                        './config.status',
+                        string=False,
+                        backup=False)
 
             # How to compile PIC objects:
-            filter_file(
-                r"^lt_prog_compiler_pic_FC=''$",
-                "lt_prog_compiler_pic_FC=' {0}'".format(
-                    self.compiler.fc_pic_flag),
-                './config.status', string=False, backup=False)
+            filter_file(r"^lt_prog_compiler_pic_FC=''$",
+                        "lt_prog_compiler_pic_FC=' {0}'".format(
+                            self.compiler.fc_pic_flag),
+                        './config.status',
+                        string=False,
+                        backup=False)

@@ -54,7 +54,8 @@ class Extpar(AutotoolsPackage):
             # to enable threads explicitly, so that the configure script of
             # extpar could get the required linker flags:
             '--with-threads',
-            '--with-netcdf=%s' % yes_or_prefix('netcdf-c')]
+            '--with-netcdf=%s' % yes_or_prefix('netcdf-c')
+        ]
 
         flags = defaultdict(list)
 
@@ -71,7 +72,8 @@ class Extpar(AutotoolsPackage):
 
         args += self.enable_or_disable('openmp')
 
-        args.extend(['{0}={1}'.format(var, ' '.join(val))
-                     for var, val in flags.items()])
+        args.extend([
+            '{0}={1}'.format(var, ' '.join(val)) for var, val in flags.items()
+        ])
 
         return args

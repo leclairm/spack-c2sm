@@ -15,23 +15,27 @@ class Libsct(AutotoolsPackage):
     variant('hdf5', default=True, description='Enable HDF5 output')
     variant('papi', default=False, description='Enable PAPI')
     variant('debug', default=False, description='Enable debug bode')
-    variant('check-timer', default=False,
+    variant('check-timer',
+            default=False,
             description='Allow to check usage of sct (reduces the accuracy '
-                        'of the performance measurements)')
-    variant('nested-timer', default=True,
+            'of the performance measurements)')
+    variant('nested-timer',
+            default=True,
             description='Enable timer nesting in reports (nested timer cannot '
-                        'be stopped while superordinate timer is still active)'
-            )
-    variant('timestamp-counter', default=False,
-            description='Enable timer based on the processor''s time-stamp '
-                        'counter (a 64-bit MSR) if accessible')
-    variant('fakelib', default=False,
+            'be stopped while superordinate timer is still active)')
+    variant('timestamp-counter',
+            default=False,
+            description='Enable timer based on the processor'
+            's time-stamp '
+            'counter (a 64-bit MSR) if accessible')
+    variant('fakelib',
+            default=False,
             description='Build additional fake libsct with same Fortran '
-                        'interface but without backend')
+            'interface but without backend')
 
     depends_on('autoconf', type='build')
     depends_on('automake', type='build')
-    depends_on('libtool',  type='build')
+    depends_on('libtool', type='build')
 
     depends_on('perl', type='test')
 
@@ -39,7 +43,8 @@ class Libsct(AutotoolsPackage):
     depends_on('hdf5', when='+hdf5')
     depends_on('papi', when='+papi')
 
-    conflicts('+openmp', when='%clang platform=darwin',
+    conflicts('+openmp',
+              when='%clang platform=darwin',
               msg='OpenMP is not supported by Apple\'s clang.')
 
     # We need a solution for the problem reported in
@@ -82,20 +87,23 @@ class Libsct(AutotoolsPackage):
 
         if '+mpi' in self.spec:
             # MPICC, CC and FC are set by Spack
-            args += ['--enable-mpi',
-                     'MPIFC=' + self.spec['mpi'].mpifc]
+            args += ['--enable-mpi', 'MPIFC=' + self.spec['mpi'].mpifc]
         else:
             args.append('--disable-mpi')
 
         if '+hdf5' in self.spec:
-            args += ['--enable-hdf5',
-                     '--with-libhdf5-prefix=' + self.spec['hdf5'].prefix]
+            args += [
+                '--enable-hdf5',
+                '--with-libhdf5-prefix=' + self.spec['hdf5'].prefix
+            ]
         else:
             args.append('--disable-hdf5')
 
         if '+papi' in self.spec:
-            args += ['--enable-papi',
-                     '--with-libpapi-prefix=' + self.spec['papi'].prefix]
+            args += [
+                '--enable-papi',
+                '--with-libpapi-prefix=' + self.spec['papi'].prefix
+            ]
         else:
             args.append('--disable-papi')
 

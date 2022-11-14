@@ -22,16 +22,18 @@ class Yaxt(AutotoolsPackage):
 
     # Do not fail if MPI_LAUNCH does not work and MPI defect checks are disabled
     # (see https://gitlab.dkrz.de/dkrz-sw/yaxt/-/commit/ff5dd54576620e35b6b93b85e791787eb53c9764):
-    patch('mpirun/0.7.0.patch',
-          # The condition matches version 0.7.0 but not 0.7.0-p1:
-          when='@:0.7.0-p0')
+    patch(
+        'mpirun/0.7.0.patch',
+        # The condition matches version 0.7.0 but not 0.7.0-p1:
+        when='@:0.7.0-p0')
 
     # Fix a typo in the makefile
     # (see https://gitlab.dkrz.de/dkrz-sw/yaxt/-/merge_requests/8)
-    patch('mpich/0.9.2.patch',
-          # We do not put ^mpich to the condition because there are other
-          # MPICH-based MPI packages that might need this:
-          when='@0.9.2:0.9.2.1')
+    patch(
+        'mpich/0.9.2.patch',
+        # We do not put ^mpich to the condition because there are other
+        # MPICH-based MPI packages that might need this:
+        when='@0.9.2:0.9.2.1')
 
     # Enable the PGI/Cray workaround also when macro NO_2D_PARAM is defined:
     patch('no_2d_param/0.7.0.patch', when='@:0.7%aocc+fortran')
@@ -50,8 +52,10 @@ class Yaxt(AutotoolsPackage):
         lib_names.append('libyaxt_c')
 
         shared = '+shared' in self.spec
-        libs = find_libraries(
-            lib_names, root=self.prefix, shared=shared, recursive=True)
+        libs = find_libraries(lib_names,
+                              root=self.prefix,
+                              shared=shared,
+                              recursive=True)
 
         if libs:
             return libs
@@ -61,18 +65,21 @@ class Yaxt(AutotoolsPackage):
             msg.format(self.spec.name, self.spec.prefix))
 
     def configure_args(self):
-        args = ['--enable-static',
-                'CC={0}'.format(self.spec['mpi'].mpicc),
-                'FC={0}'.format(self.spec['mpi'].mpifc
-                                if '+fortran' in self.spec else 'no'),
-                # We cannot provide a universal value for MPI_LAUNCH, therefore
-                # we have to disable the MPI checks:
-                '--without-regard-for-quality']
+        args = [
+            '--enable-static',
+            'CC={0}'.format(self.spec['mpi'].mpicc),
+            'FC={0}'.format(self.spec['mpi'].mpifc if '+fortran' in
+                            self.spec else 'no'),
+            # We cannot provide a universal value for MPI_LAUNCH, therefore
+            # we have to disable the MPI checks:
+            '--without-regard-for-quality'
+        ]
 
         # Do not build examples and test programs by default:
         if self.version >= ver('0.8.0'):
-            args.extend(['--with-on-demand-check-programs',
-                         '--without-example-programs'])
+            args.extend([
+                '--with-on-demand-check-programs', '--without-example-programs'
+            ])
 
         args += self.enable_or_disable('shared')
 
@@ -96,8 +103,7 @@ class Yaxt(AutotoolsPackage):
 
             # How to pass a linker flag through the compiler:
             filter_file(r'^wl=""$',
-                        'wl="{0}"'.format(self.compiler.linker_arg),
-                        'libtool')
+                        'wl="{0}"'.format(self.compiler.linker_arg), 'libtool')
 
             # How to compile PIC objects:
             filter_file(r'^pic_flag=""$',
