@@ -47,7 +47,7 @@ class Gridtools(CMakePackage):
     variant('cuda_arch',
             default='none',
             description='Build with cuda_arch',
-            values=('70', '60', '37'),
+            values=('80', '70', '60', '37'),
             multi=False)
     variant('cuda', default=True, description='Build with cuda or target gpu')
 
@@ -55,7 +55,7 @@ class Gridtools(CMakePackage):
     depends_on('cmake@3.14.5:')
     depends_on('boost@1.67.0:')
     depends_on('mpi', type=('build', 'link', 'run'), when='~cuda')
-    depends_on('mpicuda', type=('build', 'link', 'run'), when='+cuda')
+    depends_on('mpi +cuda', type=('build', 'link', 'run'), when='+cuda')
     depends_on('cuda', type=('build', 'link', 'run'), when='+cuda')
 
     def cmake_args(self):

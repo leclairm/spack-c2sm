@@ -1,47 +1,67 @@
-# The C2SM Spack Deployment
-Spack is the package manager used by C2SM and MeteoSwiss to install 
-and deploy our software on supercomputers 
-mostly at the Swiss Super Computing Center (CSCS)
-
+# The spack extension of C2SM and MCH
 [![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://C2SM.github.io/spack-c2sm/)
 
-[Detailed C2SM/MeteoSwiss spack documentation](https://c2sm.github.io/spack-c2sm/)
+Spack is the package manager used by C2SM and MeteoSwiss to install and deploy software on supercomputers, local machines and the cloud.
 
-More about spack in general : [Official Spack documentation](https://spack.readthedocs.io/en/v0.15.4/).
+Documentations: [spack-C2SM](https://C2SM.github.io/spack-c2sm/), [spack](https://spack.readthedocs.io/en/v0.18.1/)
 
-## Quickly build your local cosmo with spack:
+## Workflow
+With spack v0.18 we suggest local/individual spack instances and the use of spack environments.
 
-* **Tsa**
-
+A user clones the spack repo
 ```bash
-module load python/3.7.4
-source /project/g110/spack/user/tsa/spack/share/spack/setup-env.sh # Source spack instance
-spack info cosmo # Check available options 
-spack spec cosmo # Check if your spec is precised enough, else precise more options
-cd <cosmo_base_dir> # cosmo, not cosmo/cosmo
-spack devbuildcosmo cosmo@dev-build # -t option for test, -c for clean build usually cosmo@dev-build%pgi is enough
-
+git clone --depth 1 --recurse-submodules --shallow-submodules -b dev_v0.18.1 https://github.com/C2SM/spack-c2sm.git
 ```
-* **Daint**
-
+gets spack in the command line
 ```bash
-module load cray-python
-source /project/g110/spack/user/daint/spack/share/spack/setup-env.sh # Source spack instance
-spack info cosmo # Check available options 
-spack spec cosmo # Check if your spec is precised enough, else precise more options
-cd <cosmo_base_dir> # cosmo, not cosmo/cosmo
-spack devbuildcosmo cosmo@dev-build # -t option for test, -c for clean build usually cosmo@dev-build%pgi is enough
-
+. spack-c2sm/setup-env.sh
 ```
-
-## Automatically source the correct spack instance & python3 when using bash
-
-If you want to automatically source the correct spack instance depending on the machine you are working on, you can add the following lines to your .bashrc file:
-
+activates an environment
 ```bash
-case $(hostname -s) in
-      tsa*|arolla*) module load python; export SPACK_ROOT=/project/g110/spack/user/tsa/spack ;;
-      daint*) module load cray-python; export SPACK_ROOT=/project/g110/spack/user/daint/spack ;;
-esac
-source $SPACK_ROOT/share/spack/setup-env.sh
+spack env activate -p <path_to_env>
 ```
+and starts exploring
+```bash
+spack info <package>
+spack spec <spec>
+```
+and building
+```bash
+spack install <spec>
+spack dev-build <spec>
+```
+a package.
+
+Updating spack-c2sm is in the hands of the user.
+```bash
+git pull
+git submodule update --recursive
+```
+After an update we advice to clean
+```bash
+spack uninstall -a
+spack clean -a
+rm -rf ~/.spack
+```
+and rebuild.
+
+## Command cheat sheet
+|  | Command |
+| --- | --- |
+| Clone | `git clone --depth 1 --recurse-submodules --shallow-submodules -b dev_v0.18.1 https://github.com/C2SM/spack-c2sm.git` |
+| Load | `. spack-c2sm/setup-env.sh` autodetects machine <br>or<br>`. spack-c2sm/setup-env.sh <machine>` forces machine<br>or<br>`. spack-c2sm/setup-env.sh unknown` uses blank config<br>`spack compiler find` [autodetects compilers](https://spack.readthedocs.io/en/v0.18.1/command_index.html?highlight=spack%20load#spack-compiler-find)<br>`spack external find --all` [autodetects externally installed packages](https://spack.readthedocs.io/en/v0.18.1/command_index.html?highlight=spack%20load#spack-external-find)|
+| Update | `git pull`<br>`git submodule update --recursive` |
+| Clean | `spack uninstall -a` [uninstalls all packages](https://spack.readthedocs.io/en/v0.18.1/command_index.html?highlight=spack%20load#spack-uninstall)<br>`spack clean -a` [cleans all misc caches](https://spack.readthedocs.io/en/v0.18.1/command_index.html?highlight=spack%20load#spack-clean)<br>`rm -rf ~/.spack` removes user scope data |
+
+[**Spec syntax**](https://spack.readthedocs.io/en/v0.18.1/basic_usage.html#specs-dependencies): `<package>`[`@<version>`](https://spack.readthedocs.io/en/v0.18.1/basic_usage.html#version-specifier)[`%<compiler>`](https://spack.readthedocs.io/en/v0.18.1/basic_usage.html#compiler-specifier)[`+<variant> ~<variant>`](https://spack.readthedocs.io/en/v0.18.1/basic_usage.html#variants)[`^<sub-package> +<sub-package-variant>`](https://spack.readthedocs.io/en/v0.18.1/basic_usage.html#specs-dependencies)[`<compiler flags>`](https://spack.readthedocs.io/en/v0.18.1/basic_usage.html#compiler-flags)
+
+|  | Command |
+| --- | --- |
+| Info | `spack info <package>` |
+| Spec | `spack spec <spec>` concretizes abstract spec (unspecfied variant = **any**)<br>*Spack is not required to use the default of an unspecified variant. The default value is only a tiebreaker for the concretizer.* |
+| Install  | `spack install <spec>` |
+| Locate | `spack location --install-dir <spec>` prints location of **all** installs that satisfy the spec |
+| [Load env](https://spack.readthedocs.io/en/v0.18.1/command_index.html?highlight=spack%20load#spack-load) | `spack load <spec>` loads run environment |
+| [Activate env](https://spack.readthedocs.io/en/v0.18.1/environments.html) | `spack env activate -p <env_name>` |
+| [Deactivate env](https://spack.readthedocs.io/en/v0.18.1/environments.html) | `spack deactivate` |
+

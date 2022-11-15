@@ -1,79 +1,61 @@
-import os
-import re
-from collections import defaultdict
+# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from spack.util.environment import is_system_path
-from llnl.util import tty
+# ----------------------------------------------------------------------------
+#     spack install icontools
+#
+# You can edit this file again by typing:
+#
+#     spack edit icontools
+#
+# See the Spack documentation for more information on packaging.
+# ----------------------------------------------------------------------------
+
+from spack import *
+import subprocess
 
 
 class Icontools(AutotoolsPackage):
-    """A set of routines which may be suitable for reading, remapping and
-    writing of fields from and to predefined grids, e.g. regular (lat-lon,
-    gaussian) or triangular (ICON)."""
+    """
+    DWD ICON Tools for C2SM members. 
+    Set of tools to prepare the input files 
+    (for example the boundary condition, initial condition file,...) for ICON.
+    """
 
-    homepage = 'https://gitlab.dkrz.de/dwd-sw/dwd_icon_tools'
-    url = 'https://gitlab.dkrz.de/dwd-sw/dwd_icon_tools'
-    git = 'git@gitlab.dkrz.de:dwd-sw/dwd_icon_tools.git'
+    homepage = 'https://wiki.c2sm.ethz.ch/MODELS/ICONDwdIconTools'
+    c2sm = 'ssh://git@github.com/C2SM/icontools.git'
+    dkrz = 'ssh://git@gitlab.dkrz.de:dwd-sw/dwd_icon_tools.git'
 
-    version('master', branch='master', submodules=True)
-    version('2.5.1', tag='icontools-2.5.1', submodules=True)
-    version('2.4.12', tag='icontools-2.4.12', submodules=True)
-    version('2.4.6', tag='icontools-2.4.6', submodules=True)
+    maintainers = ['jonasjucker']
 
-    variant('mpi', default=True, description='enable MPI support')
-    variant('grib2', default=True, description='enable GRIB2 support')
-    variant('szip',
-            default=True,
-            description='enable szip compression for GRIB1')
+    version('c2sm-master', git=c2sm, branch='master', submodules=True)
+    version('dev-build', git=c2sm, branch='master', submodules=True)
+    version('dkrz-master', git=dkrz, branch='master', submodules=True)
 
-    depends_on('python', type='build')
+    depends_on('autoconf', type='build')
+    depends_on('automake', type='build')
+    depends_on('libtool', type='build')
+    depends_on('m4', type='build')
 
-    depends_on('netcdf-fortran')
-    depends_on('netcdf-c')
-    depends_on('hdf5')
-    depends_on('eccodes')
+    depends_on('netcdf-fortran', type=('build', 'link'))
+    depends_on('netcdf-c ~mpi', type=('build', 'link'))
+    depends_on('hdf5 ~mpi +hl', type=('build', 'link'))
+    depends_on(
+        'mpi',
+        type=('build', 'link', 'run'),
+    )
+    depends_on('eccodes ~aec', type=('build', 'link', 'run'))
+    depends_on('jasper@1.900.1', type=('build', 'link'))
 
-    depends_on('mpi', when='+mpi')
-    depends_on('eccodes', when='+grib2')
-    depends_on('szip', when='+szip')
-
-    # There are currently several issues related to NAG:
-    #   1. File libicontools/src/libicontools/mo_util_nml.f90 is empty after
-    #      preprocessing.
-    #   2. Error: libiconremap/mo_rbfqr_math.f90, line 934: KIND value (8) does
-    #      not specify a valid representation method.
-    #   3. It's yet unclear what additional flags g++ needs to link
-    #      OpenMP-enabled Fortran code compiled with NAG.
-    #   4. It's yet unclear what additional NAG runtime libraries we need to
-    #      link to.
-    conflicts('%nag')
-
-    # There is currently an issue related to PGI:
-    #   PGF90-S-0081-Illegal selector - KIND value must be non-negative
-    #     (libiconbase/mo_delaunay_types.f90: 332)
-    conflicts('%pgi')
-
-    def flag_handler(self, name, flags):
-        if name == 'cflags' or name == 'cxxflags':
-            # Set OpenMP flags:
-            flags.append(self.compiler.openmp_flag
-                         # We assume that NAG is mixed with GCC:
-                         if self.compiler.name != 'nag' else '-fopenmpi')
-        elif name == 'fflags':
-            # Enable building with 'gcc@10:':
-            if self.spec.satisfies('%gcc@10:'):
-                flags.append('-fallow-argument-mismatch')
-            # Set OpenMP flags:
-            flags.append(self.compiler.openmp_flag)
-            # Disable MPI support:
-            if '~mpi' in self.spec:
-                flags.append('-DNOMPI')
-        elif name == 'cppflags':
-            # Disable MPI support:
-            if '~mpi' in self.spec:
-                flags.append('-DNOMPI')
-
-        return flags, None, None
+    variant('slave',
+            default='none',
+            description='Build on described slave (e.g daint)')
+    variant('slurm_account',
+            default='g110',
+            description=
+            'Slurm account used for mandatory testing during installation')
 
     def configure_args(self):
         args = [

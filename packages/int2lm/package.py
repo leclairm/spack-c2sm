@@ -8,7 +8,6 @@ from spack import *
 
 import os
 import subprocess
-from version_detection import set_versions
 
 
 class Int2lm(MakefilePackage):
@@ -27,16 +26,13 @@ class Int2lm(MakefilePackage):
 
     # APN tags
     version('apn-master', git=git, branch='master')
-    set_versions(version, git, 'apn')
 
     # C2SM tags
     version('c2sm-master', git=c2smgit, branch='master')
     version('c2sm-features', git=c2smgit, branch='c2sm-features')
-    set_versions(version, c2smgit, 'c2sm')
 
     # ORG tags
     version('org-master', git=orggit, branch='master')
-    set_versions(version, orggit, 'org')
 
     # deprecated versions
     version('apn_master', git=git, branch='master')
@@ -53,7 +49,7 @@ class Int2lm(MakefilePackage):
     depends_on('mpi', type=('build', 'link', 'run'), when='+parallel')
     depends_on('netcdf-c', type=('build', 'link'))
     depends_on('netcdf-fortran', type=('build', 'link'))
-    depends_on('jasper@1.900.1%gcc', type=('build', 'link'))
+    depends_on('jasper@1.900.1', type=('build', 'link'))
 
     variant('debug', default=False, description='Build debug INT2LM')
     variant('eccodes',

@@ -1,6 +1,5 @@
 from spack import *
 import subprocess, re
-from version_detection import set_versions
 
 
 class CosmoDycore(CMakePackage):
@@ -27,17 +26,6 @@ class CosmoDycore(CMakePackage):
             git='ssh://git@github.com/C2SM-RCM/cosmo.git',
             branch='c2sm-features')
     version('empa-ghg', git=empagit, branch='c2sm')
-
-    set_versions(version, apngit, 'apn', regex_filter='.*mch.*')
-    set_versions(version, c2smgit, 'c2sm')
-    set_versions(version, git, 'org')
-    set_versions(version, empagit, 'empa')
-
-    #deprecated
-    version('master', branch='master')
-    version('mch',
-            git='ssh://git@github.com/MeteoSwiss-APN/cosmo.git',
-            branch='mch')
 
     variant('build_type',
             default='Release',
@@ -66,7 +54,7 @@ class CosmoDycore(CMakePackage):
     variant('cuda_arch',
             default='none',
             description='Build with cuda_arch',
-            values=('70', '60', '37'),
+            values=('80', '70', '60', '37'),
             multi=False)
     variant('cuda', default=True, description='Build with cuda or target gpu')
     variant('gt1', default=False, description='Build with gridtools 1.1.3')
@@ -109,13 +97,13 @@ class CosmoDycore(CMakePackage):
 
     depends_on('gridtools@1.1.3 ~cuda', when='~cuda+gt1')
     depends_on('gridtools@1.1.3 +cuda', when='+cuda+gt1')
-    depends_on('boost@1.67.0')
+    depends_on('boost@1.65.1: +program_options +system')
     depends_on('serialbox@2.6.0', when='+build_tests')
-    depends_on('mpicuda', type=('build', 'link', 'run'), when='+cuda')
     depends_on('mpi', type=('build', 'link', 'run'), when='~cuda')
-    depends_on('slurm%gcc', type='run')
+    depends_on('mpi +cuda', type=('build', 'link', 'run'), when='+cuda')
+    depends_on('slurm', type='run')
     depends_on('cmake@3.12:')
-    depends_on('cuda%gcc', when='+cuda', type=('build', 'link', 'run'))
+    depends_on('cuda', type=('build', 'link', 'run'), when='+cuda')
 
     conflicts('+production', when='build_type=Debug')
     conflicts('+production', when='+pmeters')

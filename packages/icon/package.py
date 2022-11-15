@@ -1,5 +1,121 @@
-import os
-from collections import defaultdict
+# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+import os, subprocess
+from spack import *
+
+import llnl.util.tty as tty
+
+
+class Icon(Package):
+    """The ICON modelling framework is a joint project between the
+    German Weather Service and the
+    Max Planck Institute for Meteorology for
+    developing a unified next-generation global numerical weather prediction and
+    climate modelling system. The ICON model has been introduced into DWD's
+    operational forecast system in January 2015."""
+
+    homepage = 'https://gitlab.dkrz.de/icon/icon'
+    url = 'https://gitlab.dkrz.de/icon/icon/-/archive/icon-2.6.2.2/icon-icon-2.6.2.2.tar.gz'
+    git = 'ssh://git@gitlab.dkrz.de/icon/icon.git'
+
+    maintainers = ['egermann']
+
+    version('master', branch='master', submodules=True)
+    version('nwp',
+            git='ssh://git@gitlab.dkrz.de/icon/icon-nwp.git',
+            submodules=True)
+    version('cscs',
+            git='ssh://git@gitlab.dkrz.de/icon/icon-cscs.git',
+            submodules=True)
+    version('aes',
+            git='ssh://git@gitlab.dkrz.de/icon/icon-aes.git',
+            submodules=True)
+    version('ham',
+            git='ssh://git@git.iac.ethz.ch:hammoz/icon-hammoz.git',
+            branch='hammoz/gpu/master',
+            submodules=True)
+    version('exclaim-master',
+            branch='master',
+            git='ssh://git@github.com/C2SM/icon-exclaim.git',
+            submodules=True)
+    version('c2sm-master',
+            branch='master',
+            git='ssh://git@github.com/C2SM/icon.git',
+            submodules=True)
+    version('2.6.x-rc', commit='040de650', submodules=True)
+    version('2.0.17', commit='39ed04ad', submodules=True)
+
+    depends_on('cmake')
+    depends_on('libxml2')
+    depends_on('serialbox +fortran', when='serialize_mode=create')
+    depends_on('serialbox +fortran', when='serialize_mode=read')
+    depends_on('serialbox +fortran', when='serialize_mode=perturb')
+    depends_on('eccodes +aec +fortran', when='+eccodes')
+    # depends_on('hdf5 +szip +hl +fortran')
+    depends_on('zlib')
+    depends_on('mpi +wrappers')
+    depends_on('claw', when='+claw', type='build')
+    depends_on('claw@:2.0.2', when='@:2.6.2.2 +claw', type='build')
+    depends_on('netcdf-fortran')
+    depends_on('netcdf-c')
+    depends_on('cuda', when='icon_target=gpu')
+    depends_on('cdo', type='test')
+
+    variant('icon_target',
+            default='gpu',
+            description='Build with target gpu or cpu',
+            values=('gpu', 'cpu'),
+            multi=False)
+    variant('host',
+            default='none',
+            description='Build on described host (e.g daint)')
+    variant('site',
+            default='cscs',
+            description='Build on described site (e.g cscs)',
+            multi=False)
+    variant('claw',
+            default=False,
+            description='Build with claw directories enabled')
+    variant('rte-rrtmgp',
+            default=True,
+            description='Build with rte-rrtmgp enabled')
+    variant('mpi-checks',
+            default=False,
+            description='Build with mpi-check enabled')
+    variant('openmp', default=True, description='Build with openmp enabled')
+    variant('serialize_mode',
+            default='none',
+            description='Build with serialization, with serialze_mode enabled',
+            values=('none', 'create', 'read', 'perturb'))
+    variant('eccodes', default=False, description='Build with grib2 enabled')
+    variant('test_name',
+            default='none',
+            description='Launch test: test_name after installation')
+    variant('skip-config', default=False, description='Skip configure phase')
+    variant('config_dir',
+            default='.',
+            description='Enable out-of-source build by describing config_dir')
+    variant('ham',
+            default=False,
+            description='Build with hammoz and atm_phy_echam enabled.')
+    variant('art', default=False, description='Build with art enabled')
+    variant('ocean', default=True, description='Build with ocean enabled')
+    variant('dace', default=False, description='Build with DACE enabled')
+    variant('rttov', default=False, description='Build with RTTOV enabled')
+    variant('mixed-precision',
+            default=False,
+            description='Build the ICON dycore in mixed precision')
+    variant('silent-rules',
+            default=True,
+            description='Build with Make silent rules ON')
+
+    conflicts('icon_target=cpu', when='+claw')
+    conflicts('icon_target=gpu', when='%intel')
+    conflicts('icon_target=gpu', when='%gcc')
+    conflicts('+dace', when='+rttov')
 
 from llnl.util import lang, filesystem
 from spack.util.environment import is_system_path, dump_environment
