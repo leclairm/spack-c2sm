@@ -246,8 +246,8 @@ class Icon(AutotoolsPackage):
 
         for x in [
                 'atmo', 'ocean', 'jsbach', 'coupling', 'ecrad', 'rte-rrtmgp',
-                'mpi', 'openmp', 'grib2',
-                'parallel-netcdf', 'sct', 'yaxt', 'mixed-precision'
+                'mpi', 'openmp', 'grib2', 'parallel-netcdf', 'sct', 'yaxt',
+                'mixed-precision'
         ]:
             config_args += self.enable_or_disable(x)
 
