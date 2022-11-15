@@ -29,19 +29,6 @@ class Icon(AutotoolsPackage):
             default=False,
             description='Enable usage of the RTE+RRTMGP toolbox '
             'for radiation calculations')
-    variant(
-        'rttov',
-        default=False,
-        description='Enable usage of the radiative transfer model for TOVS')
-    variant('dace',
-            default=False,
-            description='Enable the DACE modules for data assimilation')
-    variant('emvorado',
-            default=False,
-            description='Enable the radar forward operator EMVORADO')
-    variant('art',
-            default=False,
-            description='Enable the aerosols and reactive trace component ART')
 
     # Infrastructural Features:
     variant('mpi',
@@ -91,10 +78,6 @@ class Icon(AutotoolsPackage):
             description='Enable mixed precision dycore')
 
     depends_on('libxml2', when='+coupling')
-    depends_on('libxml2', when='+art')
-
-    depends_on('rttov+hdf5', when='+rttov')
-    depends_on('rttov~openmp', when='~openmp+rttov')
 
     for x in serialization_values:
         depends_on('serialbox+fortran', when='serialization={0}'.format(x))
@@ -104,7 +87,6 @@ class Icon(AutotoolsPackage):
     depends_on('libcdi-pio+mpi', when='+cdi-pio+mpi')
 
     default_eccodes = 'eccodes+aec jp2k=openjpeg'
-    depends_on(default_eccodes + ' +fortran', when='+emvorado')
     depends_on(default_eccodes, when='+grib2~cdi-pio')
     # Excessive statements to help the concretizer:
     depends_on(default_eccodes, type='build', when='+grib2+cdi-pio')
@@ -121,13 +103,11 @@ class Icon(AutotoolsPackage):
     depends_on('netcdf-c+mpi', type='build', when='+parallel-netcdf+cdi-pio')
 
     default_hdf5 = 'hdf5+szip'
-    depends_on(default_hdf5 + ' +hl+fortran', when='+emvorado')
     depends_on(default_hdf5, when='+sct')
     # Excessive statements to help the concretizer:
     depends_on(default_hdf5, type='build')
     depends_on(default_hdf5 + ' +mpi', type='build', when='+parallel-netcdf')
 
-    depends_on('zlib', when='+emvorado')
     depends_on('mpi', when='+mpi')
 
     for x in gpu_values:
@@ -144,9 +124,6 @@ class Icon(AutotoolsPackage):
 
     for x in claw_values:
         conflicts('+sct', when='claw={0}'.format(x))
-
-    conflicts('+dace', when='~mpi')
-    conflicts('+emvorado', when='~mpi')
 
     # We need an existing gcc compiler when '+cuda-gcc'. Taking one from the
     # PATH is not an option because we cannot always make sure that it will be
@@ -177,24 +154,6 @@ class Icon(AutotoolsPackage):
             conflicts('+cuda-gcc',
                       '^cuda%{0}'.format(x),
                       msg='"+cuda-gcc" requires "^cuda%gcc"')
-
-    # Revert a false assumptions that the completeness of the MPI Fortran module
-    # depends on the compiler version:
-    patch('dace/2.6.4/mpi_bcast_gatherv.patch',
-          when='@2.6.4:%gcc@10:+emvorado+mpi')
-    patch('dace/2.6.4/mpi_bcast_gatherv.patch',
-          when='@2.6.4:%gcc@10:+dace~emvorado+mpi')
-    patch('dace/2.6.4/mpi_alltoall_scatterv.patch',
-          when='@2.6.4:%gcc@10:+dace+mpi')
-
-    # Support for '-kind=sequential' when building with NAG:
-    patch('emvorado/2.6.4/sequential_kind.patch', when='@2.6.4:%nag+emvorado')
-
-    # Replace non-standard DFLOAT with DBLE:
-    patch('emvorado/2.6.4/dfloat.patch', when='@2.6.4:%nag+emvorado')
-
-    # https://gitlab.dkrz.de/art/art/-/merge_requests/27
-    patch('art/2.6.4/remove_linked_list.patch', when='@2.6.4:+art')
 
     for x in claw_values:
         # https://gitlab.dkrz.de/icon/icon-cimd/-/merge_requests/44
@@ -246,20 +205,6 @@ class Icon(AutotoolsPackage):
             if self.spec.satisfies('%intel@17:17.0.2+ocean+openmp'):
                 file_flags.append(('src/hamocc/common/mo_sedmnt_diffusion.f90',
                                    '$(ICON_OCEAN_FCFLAGS) -O1'))
-        elif self.compiler.name in ['pgi', 'nvhpc']:
-            if '+emvorado' in self.spec:
-                file_flags.append(
-                    ('src/data_assimilation/interfaces/radar_interface.f90',
-                     '$(ICON_FCFLAGS) -O1'))
-            if self.spec.satisfies('@:2.6.4+dace'):
-                if self.compiler.name == 'nvhpc':
-                    file_flags.append(
-                        ('externals/dace_icon/src_for_icon/mo_rad.f90',
-                         '$(ICON_FCFLAGS) -O1'))
-                if '~rttov' in self.spec:
-                    file_flags.append(
-                        ('externals/dace_icon/src_for_icon/mo_t_enkf.f90',
-                         '$(ICON_FCFLAGS) -O1'))
         elif self.compiler.name == 'cce':
             if self.compiler.version == ver('12.0.2'):
                 file_flags.append(
@@ -273,11 +218,6 @@ class Icon(AutotoolsPackage):
                 file_flags.append(
                     ('externals/jsbach/src/base/mo_jsb_process_factory.f90',
                      '$(ICON_FCFLAGS) -O0'))
-        elif self.compiler.name == 'aocc':
-            if self.spec.satisfies('@:2.6.4+dace'):
-                file_flags.append(
-                    ('externals/dace_icon/src_for_icon/mo_cosmo_obs_data.f90',
-                     '$(ICON_FCFLAGS) -O1'))
 
         if not file_flags:
             return
@@ -306,7 +246,7 @@ class Icon(AutotoolsPackage):
 
         for x in [
                 'atmo', 'ocean', 'jsbach', 'coupling', 'ecrad', 'rte-rrtmgp',
-                'rttov', 'dace', 'emvorado', 'art', 'mpi', 'openmp', 'grib2',
+                'mpi', 'openmp', 'grib2',
                 'parallel-netcdf', 'sct', 'yaxt', 'mixed-precision'
         ]:
             config_args += self.enable_or_disable(x)
@@ -340,12 +280,7 @@ class Icon(AutotoolsPackage):
             fc_version = (ver(self.compiler.fc_version(self.compiler.fc))
                           if self._compiler_is_mixed_gfortran() else
                           self.compiler.version)
-            if fc_version < ver(10):
-                if '+emvorado' in self.spec or '+dace' in self.spec:
-                    # For externals/dace_icon/src_for_icon/mo_mpi_dace.f90:
-                    if self.version <= ver('2.6.4'):
-                        config_vars['ICON_FCFLAGS'].append('-fno-range-check')
-            else:
+            if fc_version > ver(9):
                 config_vars['ICON_FCFLAGS'].append('-fallow-argument-mismatch')
                 config_vars['ICON_OCEAN_FCFLAGS'].append(
                     '-fallow-argument-mismatch')
@@ -396,11 +331,6 @@ class Icon(AutotoolsPackage):
                 '-C=recursion'
             ])
             config_vars['ICON_BUNDLED_FCFLAGS'] = []
-            # Help NAG compiler locate radar_elevations_precipscan.incf:
-            if '+dace' in self.spec:
-                # DACE uses 'NAG' instead of 'NAGFOR':
-                if self.version <= ver('2.6.4'):
-                    config_vars['ICON_FCFLAGS'].append('-DNAG')
         elif self.compiler.name in ['pgi', 'nvhpc']:
             config_vars['CFLAGS'].extend(['-g', '-O2'])
             config_vars['FCFLAGS'].extend(
@@ -411,12 +341,6 @@ class Icon(AutotoolsPackage):
                     '-ta=nvidia:cc{0}'.format(gpu)
                 ])
                 config_vars['ICON_FCFLAGS'].append('-D__SWAPDIM')
-                if self.spec.satisfies('+dace'):
-                    # Different implementation of link and acc declare between
-                    # cray and pgi (see
-                    # externals/dace_icon/src_for_icon/parallel_utilities.f90):
-                    if self.version <= ver('2.6.4'):
-                        config_vars['ICON_FCFLAGS'].append('-DPGI_FIX_ACCLINK')
         elif self.compiler.name == 'cce':
             config_vars['CFLAGS'].append('-g')
             config_vars['ICON_CFLAGS'].append('-O3')
@@ -439,7 +363,7 @@ class Icon(AutotoolsPackage):
             config_vars['CFLAGS'].extend(['-g', '-O2'])
             config_vars['FCFLAGS'].extend(['-g', '-O2'])
 
-        if '+coupling' in self.spec or '+art' in self.spec:
+        if '+coupling' in self.spec:
             xml2_spec = self.spec['libxml2']
             libs += xml2_spec.libs
             # Account for the case when libxml2 is an external package installed
@@ -468,17 +392,11 @@ class Icon(AutotoolsPackage):
         if '+cdi-pio' in self.spec:
             libs += self.spec['libcdi-pio:fortran'].libs
 
-        if '+emvorado' in self.spec:
-            libs += self.spec['eccodes:fortran'].libs
-
         if '+grib2~cdi-pio' in self.spec:
             libs += self.spec['eccodes:c'].libs
 
         if '+cdi-pio' in self.spec:
             libs += self.spec['yaxt:fortran'].libs
-
-        if '+rttov' in self.spec:
-            libs += self.spec['rttov'].libs
 
         libs += self.spec['lapack:fortran'].libs
         libs += self.spec['blas:fortran'].libs
@@ -487,13 +405,8 @@ class Icon(AutotoolsPackage):
         if '+coupling' in self.spec or '~cdi-pio' in self.spec:
             libs += self.spec['netcdf-c'].libs
 
-        if '+emvorado' in self.spec or '+rttov' in self.spec:
-            libs += self.spec['hdf5:fortran,hl'].libs
-        elif '+sct' in self.spec:
+        if '+sct' in self.spec:
             libs += self.spec['hdf5'].libs
-
-        if '+emvorado' in self.spec:
-            libs += self.spec['zlib'].libs
 
         if '+mpi' in self.spec:
             config_args.extend([
@@ -572,16 +485,6 @@ class Icon(AutotoolsPackage):
         return config_args
 
     @run_after('configure')
-    def adjust_rttov_macro(self):
-        if '+rttov' in self.spec:
-            rttov_major_version = self.spec['rttov'].version.up_to(1)
-            if rttov_major_version != ver(13):
-                filter_file('_RTTOV_VERSION=13',
-                            '_RTTOV_VERSION={0}'.format(rttov_major_version),
-                            'icon.mk',
-                            string=True,
-                            backup=False)
-
     def build(self, spec, prefix):
         claw = self.spec.variants['claw'].value
         if claw != 'none' and make_jobs > 8:
