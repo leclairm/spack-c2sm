@@ -3,7 +3,7 @@
 **.swp
 **.swo
 log/
-env/
+.venv/
 spack-build_stage/
 spack-test_stage/
 spack-misc_cache/
