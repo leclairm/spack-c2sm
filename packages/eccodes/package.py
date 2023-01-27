@@ -1,21 +1,9 @@
-# Copyright 2013-2020 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
-#
-# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+from spack.package import *
 
-#
-from spack import *
+from spack.pkg.builtin.eccodes import Eccodes as SpackEccodes
 
 
-class Eccodes(CMakePackage):
-    """ecCodes is a package developed by ECMWF for processing meteorological
-    data in GRIB (1/2), BUFR (3/4) and GTS header formats."""
-
-    homepage = 'https://software.ecmwf.int/wiki/display/ECC/ecCodes+Home'
-    url = 'https://confluence.ecmwf.int/download/attachments/45757960/eccodes-2.2.0-Source.tar.gz?api=v2'
-    list_url = 'https://software.ecmwf.int/wiki/display/ECC/Releases'
-
-    maintainers = ['skosukhin']
+class Eccodes(SpackEccodes):
 
     version('2.19.0',
             sha256=

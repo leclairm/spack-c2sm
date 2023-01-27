@@ -31,7 +31,6 @@ class Icontools(AutotoolsPackage):
     maintainers = ['jonasjucker']
 
     version('c2sm-master', git=c2sm, branch='master', submodules=True)
-    version('dev-build', git=c2sm, branch='master', submodules=True)
     version('dkrz-master', git=dkrz, branch='master', submodules=True)
 
     depends_on('autoconf', type='build')
@@ -46,10 +45,7 @@ class Icontools(AutotoolsPackage):
         'mpi',
         type=('build', 'link', 'run'),
     )
-    depends_on('eccodes ~aec', type=('build', 'link', 'run'))
-    depends_on('cosmo-grib-api',
-               type=('build', 'link', 'run'),
-               when='~eccodes')
+    depends_on('eccodes@2.19.0 +fortran ~aec', type=('build', 'link', 'run'))
     depends_on('jasper@1.900.1', type=('build', 'link'))
 
     variant('slave',
@@ -115,7 +111,7 @@ class Icontools(AutotoolsPackage):
     def check(self):
 
         # only c2sm-versions have script for CSCS
-        if self.spec.version in (Version('c2sm-master'), Version('dev-build')):
+        if self.spec.version in (Version('c2sm-master'), ):
 
             if self.spec.variants['slave'].value == 'daint':
                 test_process = subprocess.run([

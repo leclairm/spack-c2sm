@@ -9,7 +9,7 @@ packages:
   gridtools: # manually added
     variants: +cuda cuda_arch=80
   icon: # manually added
-    variants: host=balfrin
+    variants: host=balfrin ^cdo%gcc
   icontools: # manually added
     variants: slave=balfrin
   int2lm: # manually added

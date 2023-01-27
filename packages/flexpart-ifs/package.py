@@ -34,8 +34,7 @@ class FlexpartIfs(MakefilePackage):
 
     @property
     def build_targets(self):
-        build = ['ncf=yes', 'VERBOSE=1', 'serial']
-        return build
+        return ['ncf=yes', 'VERBOSE=1', 'serial']
 
     def edit(self, spec, prefix):
         copy('src/makefile.meteoswiss', 'src/makefile')

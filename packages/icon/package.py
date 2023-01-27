@@ -21,10 +21,10 @@ class Icon(Package):
     url = 'https://gitlab.dkrz.de/icon/icon/-/archive/icon-2.6.2.2/icon-icon-2.6.2.2.tar.gz'
     git = 'ssh://git@gitlab.dkrz.de/icon/icon.git'
 
-    maintainers = ['egermann']
+    maintainers = ['jonasjucker', 'PanicSheep']
 
     version('master', branch='master', submodules=True)
-    version('dev-build', branch='master', submodules=True)
+    version('2.6.5', tag='icon-2.6.5', submodules=True)
     version('nwp',
             git='ssh://git@gitlab.dkrz.de/icon/icon-nwp.git',
             submodules=True)
@@ -46,24 +46,22 @@ class Icon(Package):
             branch='master',
             git='ssh://git@github.com/C2SM/icon.git',
             submodules=True)
-    version('2.6.x-rc', commit='040de650', submodules=True)
-    version('2.0.17', commit='39ed04ad', submodules=True)
 
     depends_on('cmake')
     depends_on('libxml2')
-    depends_on('eccodes@2.19.0: +shared',
-               when='+eccodes',
-               type=('build', 'link', 'run'))
-    depends_on('claw@2.0.2', when='+claw', type='build')
+    depends_on('serialbox +fortran', when='serialize_mode=create')
+    depends_on('serialbox +fortran', when='serialize_mode=read')
+    depends_on('serialbox +fortran', when='serialize_mode=perturb')
+    depends_on('eccodes +aec +fortran', when='+eccodes')
+    # depends_on('hdf5 +szip +hl +fortran')
+    depends_on('zlib')
+    depends_on('mpi +wrappers')
+    depends_on('claw', when='+claw', type='build')
+    depends_on('claw@:2.0.2', when='@:2.6.2.2 +claw', type='build')
     depends_on('netcdf-fortran')
     depends_on('netcdf-c')
-    depends_on('cdo')
-    depends_on('mpi +wrappers')
-
-    for x in ['create', 'read', 'perturb']:
-        depends_on('serialbox@2.6.0 ~python ~sdb ~shared',
-                   type=('build', 'link', 'run'),
-                   when=f'serialize_mode={x}')
+    depends_on('cuda', when='icon_target=gpu')
+    depends_on('cdo', type='test')
 
     variant('icon_target',
             default='gpu',

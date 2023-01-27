@@ -2,7 +2,6 @@ packages:
   all:
     compiler: # manually added
       - gcc@8.3.0
-      - nvhpc@21.2
       - pgi@20.4
     providers:
       mpi: # manually added
@@ -141,13 +140,8 @@ packages:
       prefix: /usr
   openjdk:
     externals:
-    - spec: openjdk@1.8.0_302-b08
-      prefix: /usr
-  krb5:
-    externals:
     - spec: krb5@1.15.1
       prefix: /usr
-  libfuse:
     externals:
     - spec: libfuse@2.9.2
       prefix: /usr

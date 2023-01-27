@@ -171,16 +171,18 @@ compilers:
       cxx: CC
       f77: ftn
       fc: ftn
-    flags: {}
-    operating_system: cnl7
+    spec: intel@2021.3.0
     target: any
-    modules:
-    - PrgEnv-intel
-    - intel/19.1.1.217
+- compiler:
     environment: {}
     extra_rpaths: []
-- compiler:
-    spec: intel@2022.1.0
+    flags:  {}
+    modules:
+    - PrgEnv-nvidia
+    - nvidia/21.3
+    - daint-gpu
+    - CrayNvidia/.21.09
+    operating_system: cnl7
     paths:
       cc: cc
       cxx: CC
