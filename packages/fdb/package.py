@@ -72,6 +72,7 @@ class Fdb(CMakePackage):
         enable_build_tools = "+tools" in self.spec
 
         args = [
+            self.define("CMAKE_INSTALL_LIBDIR", 'lib'),
             self.define("ENABLE_FDB_BUILD_TOOLS", enable_build_tools),
             self.define("ENABLE_BUILD_TOOLS", enable_build_tools),
             # We cannot disable the FDB backend in indexed filesystem with

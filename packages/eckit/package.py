@@ -25,11 +25,11 @@ class Eckit(CMakePackage):
             default=True,
             description="Build utilities for administration tools")
     variant("sql", default=True, description="Build SQL engine")
-    variant(
-        "linalg",
-        values=any_combination_of("eigen", "armadillo", "mkl", "lapack"),
-        description="List of supported linear algebra backends",
-    )
+    # variant(
+    #     "linalg", default="eigen",
+    #     values="eigen",
+    #     description="List of supported linear algebra backends",
+    # )
     variant(
         "compression",
         values=any_combination_of("bzip2", "snappy", "lz4", "aec"),
@@ -67,10 +67,10 @@ class Eckit(CMakePackage):
     depends_on("yacc", type="build", when="+sql")
     depends_on("flex", type="build", when="+sql")
 
-    depends_on("eigen", when="linalg=eigen")
-    depends_on("armadillo", when="linalg=armadillo")
-    depends_on("mkl", when="linalg=mkl")
-    depends_on("lapack", when="linalg=lapack")
+    depends_on("eigen")
+    # depends_on("armadillo", when="linalg=armadillo")
+    # depends_on("mkl", when="linalg=mkl")
+    # depends_on("lapack", when="linalg=lapack")
 
     depends_on("bzip2", when="compression=bzip2")
     depends_on("snappy", when="compression=snappy")
@@ -88,12 +88,12 @@ class Eckit(CMakePackage):
     #   eckit linalg=mkl
     #   eckit linalg=mkl,lapack
     # We prevent that by introducing the following conflict:
-    conflicts(
-        "linalg=lapack",
-        when="linalg=mkl",
-        msg='"linalg=lapack" is implied when "linalg=mkl" and '
-        "must not be specified additionally",
-    )
+    # conflicts(
+    #     "linalg=lapack",
+    #     when="linalg=mkl",
+    #     msg='"linalg=lapack" is implied when "linalg=mkl" and '
+    #     "must not be specified additionally",
+    # )
 
     def cmake_args(self):
         args = [
@@ -112,9 +112,9 @@ class Eckit(CMakePackage):
             self.define_from_variant("ENABLE_MPI", "mpi"),
             self.define_from_variant("ENABLE_ECKIT_CMD", "admin"),
             self.define_from_variant("ENABLE_ECKIT_SQL", "sql"),
-            self.define("ENABLE_EIGEN", "linalg=eigen" in self.spec),
-            self.define("ENABLE_ARMADILLO", "linalg=armadillo" in self.spec),
-            self.define("ENABLE_MKL", "linalg=mkl" in self.spec),
+            self.define("ENABLE_EIGEN", True),
+            # self.define("ENABLE_ARMADILLO", "linalg=armadillo" in self.spec),
+            # self.define("ENABLE_MKL", "linalg=mkl" in self.spec),
             self.define("ENABLE_BZIP2", "compression=bzip2" in self.spec),
             self.define("ENABLE_SNAPPY", "compression=snappy" in self.spec),
             self.define("ENABLE_LZ4", "compression=lz4" in self.spec),
@@ -145,10 +145,10 @@ class Eckit(CMakePackage):
             self.define("ENABLE_SANDBOX", False),
         ]
 
-        if "linalg=mkl" not in self.spec:
-            # ENABLE_LAPACK is ignored if MKL backend is enabled
-            # (the LAPACK backend is still built though):
-            args.append(
-                self.define("ENABLE_LAPACK", "linalg=lapack" in self.spec))
+        # if "linalg=mkl" not in self.spec:
+        #     # ENABLE_LAPACK is ignored if MKL backend is enabled
+        #     # (the LAPACK backend is still built though):
+        #     args.append(
+        #         self.define("ENABLE_LAPACK", "linalg=lapack" in self.spec))
 
         return args
