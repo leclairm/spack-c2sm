@@ -14,7 +14,7 @@ class FdbFortran(CMakePackage):
     homepage = 'https://github.com/MeteoSwiss/fdb-fortran'
     version('archive_retreive',
             git='https://github.com/MeteoSwiss/fdb-fortran.git',
-            branch='archive_retreive')
+            tag='0.1.0')
 
     depends_on('cmake@3.10:', type=('build'))
     depends_on('fdb ^eckit@1.20.2: ~mpi ^metkit@1.9.2', type=('build', 'link'))
