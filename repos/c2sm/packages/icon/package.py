@@ -442,6 +442,8 @@ class Icon(AutotoolsPackage, CudaPackage):
             flags['CFLAGS'].extend(['-g', '-O2'])
             flags['FCFLAGS'].extend(
                 ['-g', '-O', '-Mrecursive', '-Mallocatable=03', '-Mbackslash'])
+            if self.compiler.version > Version('24.1'):
+                flags['FCFLAGS'].append('-nvmalloc')
 
             if self.spec.variants['gpu'].value == 'openacc+cuda':
                 flags['FCFLAGS'].extend([
