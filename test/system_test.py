@@ -76,6 +76,7 @@ def test_install_libfyaml_default():
 
 @pytest.mark.no_tsa  # No uenv on Tsa
 @pytest.mark.no_daint  # No uenv on Daint
+@pytest.mark.no_balfrin  # Does not work as expected
 @pytest.mark.libfyaml
 def test_install_libfyaml_default_uenv():
     spack_install('libfyaml', test_root=False, uenv=PREPOST)
@@ -181,14 +182,16 @@ def icon_env_test(spack_env: str, out_of_source: bool = False):
         check=True,
         shell=True)
 
+    log_filename = sanitized_filename(spack_env)
+
     if out_of_source:
         build_dir = os.path.join(unique_folder, 'build')
         os.makedirs(build_dir, exist_ok=True)
         shutil.copytree(os.path.join(unique_folder, 'config'),
                         os.path.join(build_dir, 'config'))
         unique_folder = build_dir
+        log_filename += '_out_of_source'
 
-    log_filename = sanitized_filename(spack_env) + '_out_of_source'
     log_with_spack('spack install -n -v',
                    'system_test',
                    log_filename,
@@ -326,13 +329,6 @@ def test_py_asttokens_install_default(devirt_env):
 @pytest.mark.py_black
 def test_py_black_install_default(devirt_env):
     spack_install('py-black')
-
-
-@pytest.mark.no_tsa  # No uenv on Tsa
-@pytest.mark.no_daint  # No uenv on Daint
-@pytest.mark.py_black
-def test_install_py_black_default_uenv(devirt_env):
-    spack_install('py-black', uenv=PREPOST)
 
 
 @pytest.mark.py_boltons

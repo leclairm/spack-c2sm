@@ -31,9 +31,9 @@ def log_with_spack(command: str,
     if uenv:
         spack_env += ' /user-environment'
 
-    # Only use srun as Jenkins user and not on balfrin
+    # Only use srun as Jenkins user and on machines where it is available
     use_srun = allow_srun and getpass.getuser() == 'jenkins' and machine_name(
-    ) != 'balfrin'
+    ) in ['daint', 'tsa']
 
     uenv_args = ''
     if uenv:
@@ -48,7 +48,6 @@ def log_with_spack(command: str,
         # The '-c' argument should be in sync with
         # sysconfig/<machine>/config.yaml config:build_jobs for max efficiency
 
-        # No entry for balfrin, trigger and error instead if requested to run with srun
         srun = {
             'daint': 'srun -t 02:00:00 -C gpu -A g110 -c 12 -n 1',
             'tsa': 'srun -t 02:00:00 -c 6',
